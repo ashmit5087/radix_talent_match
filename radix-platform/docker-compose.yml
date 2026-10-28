@@ -1,0 +1,123 @@
+version: "3.9"
+
+# RADIX Platform — Docker Compose
+# Starts all five backend services and the Vite frontend in one command.
+# Usage: docker-compose up --build
+#
+# Prerequisites:
+#   - Set GROQ_API_KEY in a root .env file (for Role 2 resume parsing)
+#   - Set GEMINI_API_KEY (for Role 1 JD Analytics)
+#   - Supabase credentials are optional; Role 3 falls back to in-memory storage
+
+services:
+
+  # ─── Role 1: JD Analytics ──────────────────────────────────────────────────
+  role-1-jd-analytics:
+    build:
+      context: ./services/role-1-jd-analytics
+    container_name: radix-role1
+    ports:
+      - "8001:8001"
+    environment:
+      - GEMINI_API_KEY=${GEMINI_API_KEY:-}
+      - PORT=8001
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8001
+    volumes:
+      - role1-chroma:/app/chroma_db
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8001/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # ─── Role 2: Resume Parsing ────────────────────────────────────────────────
+  role-2-resume-parsing:
+    build:
+      context: ./services/role-2-resume-parsing
+    container_name: radix-role2
+    ports:
+      - "8002:8002"
+    environment:
+      - GROQ_API_KEY=${GROQ_API_KEY:-}
+      - PORT=8002
+    command: uvicorn api_server:app --host 0.0.0.0 --port 8002
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8002/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # ─── Role 3: Profile Builder ───────────────────────────────────────────────
+  role-3-profile-builder:
+    build:
+      context: ./services/role-3-profile-builder
+    container_name: radix-role3
+    ports:
+      - "8003:8003"
+    environment:
+      - SUPABASE_URL=${SUPABASE_URL:-}
+      - SUPABASE_ANON_KEY=${SUPABASE_ANON_KEY:-}
+      - PORT=8003
+    command: uvicorn main:app --host 0.0.0.0 --port 8003
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8003/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # ─── Role 4: Talent Check ──────────────────────────────────────────────────
+  role-4-talent-check:
+    build:
+      context: ./services/role-4-talent-check
+    container_name: radix-role4
+    ports:
+      - "8004:8004"
+    environment:
+      - PORT=8004
+    command: uvicorn talent_check.backend.api:app --host 0.0.0.0 --port 8004
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8004/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # ─── Role 5: Skill Matching ────────────────────────────────────────────────
+  role-5-skill-matching:
+    build:
+      context: ./services/role-5-skill-matching
+    container_name: radix-role5
+    ports:
+      - "8005:8005"
+    environment:
+      - PORT=8005
+    command: uvicorn skill_matching.api:app --host 0.0.0.0 --port 8005
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8005/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # ─── Frontend ──────────────────────────────────────────────────────────────
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        VITE_JD_API_BASE_URL: http://localhost:8001
+        VITE_RESUME_API_BASE_URL: http://localhost:8002
+        VITE_PROFILE_API_BASE_URL: http://localhost:8003
+        VITE_TALENT_CHECK_API_BASE_URL: http://localhost:8004
+        VITE_SKILL_MATCH_API_BASE_URL: http://localhost:8005
+        VITE_PROFILE_CONTRACT_CONFIRMED: "true"
+    container_name: radix-frontend
+    ports:
+      - "5173:5173"
+    command: npm run dev
+    depends_on:
+      - role-1-jd-analytics
+      - role-2-resume-parsing
+      - role-3-profile-builder
+      - role-4-talent-check
+      - role-5-skill-matching
+
+volumes:
+  role1-chroma:

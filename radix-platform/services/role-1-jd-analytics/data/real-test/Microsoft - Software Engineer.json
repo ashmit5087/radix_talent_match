@@ -1,0 +1,68 @@
+{
+  "source_type": "jd",
+  "source_file": "Microsoft - Software Engineer.docx",
+  "company": null,
+  "role": null,
+  "skills": [
+    {
+      "skill_name": "Data Structures",
+      "category_code": "DSA",
+      "evidence": "Strong data structures and algorithms fundamentals — hash maps, trees, and complexity analysis, applied confidently under time pressure",
+      "confidence": "high"
+    },
+    {
+      "skill_name": "Algorithms",
+      "category_code": "DSA",
+      "evidence": "Strong data structures and algorithms fundamentals — hash maps, trees, and complexity analysis, applied confidently under time pressure",
+      "confidence": "high"
+    },
+    {
+      "skill_name": "Object-Oriented Programming",
+      "category_code": "OOD",
+      "evidence": "Understanding of object-oriented design and SOLID principles, and how to design software that's easy to extend",
+      "confidence": "high"
+    },
+    {
+      "skill_name": "Communication",
+      "category_code": "COMM",
+      "evidence": "Strong communication — able to describe a hard problem you solved and how you collaborate across teams",
+      "confidence": "high"
+    },
+    {
+      "skill_name": "Collaboration",
+      "category_code": "COMM",
+      "evidence": "Strong communication — able to describe a hard problem you solved and how you collaborate across teams",
+      "confidence": "high"
+    },
+    {
+      "skill_name": "Microsoft Azure",
+      "category_code": "CLOUD",
+      "evidence": "Join a team building scalable software across Microsoft products such as Azure, Microsoft 365, and Windows.",
+      "confidence": "high"
+    },
+    {
+      "skill_name": "Agile",
+      "category_code": "SWE",
+      "evidence": "Participate in Agile ceremonies and design reviews with your team",
+      "confidence": "high"
+    },
+    {
+      "skill_name": "REST APIs",
+      "category_code": "SYSD",
+      "evidence": "Working knowledge of operating systems (process scheduling, virtual memory, concurrency primitives) and core networking (REST APIs, timeouts, request lifecycle)",
+      "confidence": "high"
+    },
+    {
+      "skill_name": "Networking",
+      "category_code": "NETW",
+      "evidence": "Working knowledge of operating systems (process scheduling, virtual memory, concurrency primitives) and core networking (REST APIs, timeouts, request lifecycle)",
+      "confidence": "high"
+    },
+    {
+      "skill_name": "Operating Systems",
+      "category_code": "OS",
+      "evidence": "Working knowledge of operating systems (process scheduling, virtual memory, concurrency primitives) and core networking (REST APIs, timeouts, request lifecycle)",
+      "confidence": "high"
+    }
+  ]
+}

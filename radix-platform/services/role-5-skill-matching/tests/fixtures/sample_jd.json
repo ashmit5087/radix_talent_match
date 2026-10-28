@@ -1,0 +1,69 @@
+{
+  "_fixture_note": "SYNTHETIC FIXTURE for smoke tests only - not official RADIX hackathon data. Replace with the official pack via the agreed data location.",
+  "source_type": "jd",
+  "source_file": "synthetic_swe_jd.json",
+  "company": "Synthetic Co (fixture)",
+  "role": "Software Engineer (synthetic)",
+  "skills": [
+    {
+      "skill_name": "Python",
+      "category_code": "COD",
+      "evidence": "Experience building software in Python",
+      "confidence": "high"
+    },
+    {
+      "skill_name": "Java",
+      "category_code": "COD",
+      "evidence": "Proficiency in Java or a comparable language",
+      "confidence": "high"
+    },
+    {
+      "skill_name": "Data Structures and Algorithms",
+      "category_code": "DSA",
+      "evidence": "Strong foundations in data structures and algorithms",
+      "confidence": "high"
+    },
+    {
+      "skill_name": "Object-Oriented Design",
+      "category_code": "OOD",
+      "evidence": "Applies object-oriented design principles",
+      "confidence": "high"
+    },
+    {
+      "skill_name": "System Design",
+      "category_code": "SYSD",
+      "evidence": "Contributes to the design of scalable systems",
+      "confidence": "high"
+    },
+    {
+      "skill_name": "SQL",
+      "category_code": "SQL",
+      "evidence": "Writes queries against relational databases",
+      "confidence": "high"
+    },
+    {
+      "skill_name": "Operating Systems",
+      "category_code": "OS",
+      "evidence": "Understanding of operating system concepts",
+      "confidence": "high"
+    },
+    {
+      "skill_name": "Computer Networks",
+      "category_code": "NETW",
+      "evidence": "Familiarity with networking fundamentals",
+      "confidence": "high"
+    },
+    {
+      "skill_name": "Git",
+      "category_code": "SWE",
+      "evidence": "Uses version control in team workflows",
+      "confidence": "high"
+    },
+    {
+      "skill_name": "Communication",
+      "category_code": "COMM",
+      "evidence": "Communicates clearly with cross-functional partners",
+      "confidence": "medium"
+    }
+  ]
+}

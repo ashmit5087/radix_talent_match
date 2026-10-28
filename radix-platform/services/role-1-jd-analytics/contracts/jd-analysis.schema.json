@@ -1,0 +1,125 @@
+{
+  "$defs": {
+    "Skill": {
+      "properties": {
+        "category_code": {
+          "enum": [
+            "COD",
+            "DSA",
+            "OOD",
+            "APTI",
+            "COMM",
+            "AI",
+            "CLOUD",
+            "SQL",
+            "SWE",
+            "SYSD",
+            "NETW",
+            "OS",
+            "OTHER"
+          ],
+          "title": "Category Code",
+          "type": "string"
+        },
+        "confidence": {
+          "enum": [
+            "high",
+            "medium",
+            "low"
+          ],
+          "title": "Confidence",
+          "type": "string"
+        },
+        "evidence": {
+          "title": "Evidence",
+          "type": "string"
+        },
+        "skill_name": {
+          "title": "Skill Name",
+          "type": "string"
+        }
+      },
+      "required": [
+        "skill_name",
+        "category_code",
+        "evidence",
+        "confidence"
+      ],
+      "title": "Skill",
+      "type": "object"
+    }
+  },
+  "description": "The shared `ExtractedSkillList` plus the `jd_id` other roles use to refer to this analysis.",
+  "example": {
+    "company": "Example Company",
+    "jd_id": "3f0c6a52-8d3e-4a58-9c1e-2f6f9a1d7b10",
+    "role": "Data Scientist",
+    "skills": [
+      {
+        "category_code": "COD",
+        "confidence": "high",
+        "evidence": "Proficiency in Python programming",
+        "skill_name": "Python"
+      }
+    ],
+    "source_file": "data_scientist.pdf",
+    "source_type": "jd"
+  },
+  "properties": {
+    "company": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Company"
+    },
+    "jd_id": {
+      "description": "UUID of the saved analysis. Pass it to GET /jds/{jd_id} or to Skill Matching.",
+      "title": "Jd Id",
+      "type": "string"
+    },
+    "role": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Role"
+    },
+    "skills": {
+      "items": {
+        "$ref": "#/$defs/Skill"
+      },
+      "title": "Skills",
+      "type": "array"
+    },
+    "source_file": {
+      "title": "Source File",
+      "type": "string"
+    },
+    "source_type": {
+      "enum": [
+        "jd",
+        "resume"
+      ],
+      "title": "Source Type",
+      "type": "string"
+    }
+  },
+  "required": [
+    "source_type",
+    "source_file",
+    "jd_id"
+  ],
+  "title": "JDAnalysisResponse",
+  "type": "object"
+}

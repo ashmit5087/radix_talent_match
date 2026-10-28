@@ -1,0 +1,62 @@
+{
+  "source_type": "jd",
+  "source_file": "Oracle - Associate Software Engineer.docx",
+  "company": null,
+  "role": null,
+  "skills": [
+    {
+      "skill_name": "Data Structures",
+      "category_code": "DSA",
+      "evidence": "Core data structures knowledge — arrays vs.",
+      "confidence": "high"
+    },
+    {
+      "skill_name": "Object-Oriented Programming",
+      "category_code": "OOD",
+      "evidence": "Object-oriented programming fundamentals — inheritance, polymorphism, abstract classes vs.",
+      "confidence": "high"
+    },
+    {
+      "skill_name": "Aptitude",
+      "category_code": "APTI",
+      "evidence": "Strong quantitative aptitude — time-and-work, ratios, percentages, and logical/seating-arrangement style reasoning",
+      "confidence": "high"
+    },
+    {
+      "skill_name": "Communication",
+      "category_code": "COMM",
+      "evidence": "Clear communication and a collaborative attitude — comfortable explaining your final-year project and working under deadline pressure",
+      "confidence": "high"
+    },
+    {
+      "skill_name": "Collaboration",
+      "category_code": "COMM",
+      "evidence": "Perform unit testing and collaborate closely with QA",
+      "confidence": "high"
+    },
+    {
+      "skill_name": "SQL",
+      "category_code": "SQL",
+      "evidence": "Practical SQL knowledge — correct SELECT/WHERE syntax, understanding of DELETE vs.",
+      "confidence": "high"
+    },
+    {
+      "skill_name": "Agile",
+      "category_code": "SWE",
+      "evidence": "You'll work across development, customization, and support in an Agile environment.",
+      "confidence": "high"
+    },
+    {
+      "skill_name": "Software Testing",
+      "category_code": "SWE",
+      "evidence": "Perform unit testing and collaborate closely with QA",
+      "confidence": "high"
+    },
+    {
+      "skill_name": "Operating Systems",
+      "category_code": "OS",
+      "evidence": "Operating systems basics — what a process is, fundamentals of multithreading and memory management",
+      "confidence": "high"
+    }
+  ]
+}

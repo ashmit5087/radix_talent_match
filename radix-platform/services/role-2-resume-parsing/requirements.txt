@@ -1,0 +1,10 @@
+pydantic>=2
+pdfplumber
+python-docx
+langchain-core
+langchain-groq
+python-dotenv
+# HTTP adapter dependencies (api_server.py)
+fastapi>=0.110
+uvicorn[standard]>=0.29
+python-multipart>=0.0.9

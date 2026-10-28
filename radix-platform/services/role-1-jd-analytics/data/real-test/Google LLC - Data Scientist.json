@@ -1,0 +1,32 @@
+{
+  "source_type": "jd",
+  "source_file": "Google LLC - Data Scientist.docx",
+  "company": null,
+  "role": null,
+  "skills": [
+    {
+      "skill_name": "Communication",
+      "category_code": "COMM",
+      "evidence": "Excellent communication skills — able to explain a complex model or a surprising result to a product manager in plain language, and defend assumptions when challenged",
+      "confidence": "high"
+    },
+    {
+      "skill_name": "Stakeholder Management",
+      "category_code": "COMM",
+      "evidence": "Present findings clearly to both technical and non-technical stakeholders",
+      "confidence": "high"
+    },
+    {
+      "skill_name": "Machine Learning",
+      "category_code": "AI",
+      "evidence": "Foundational machine learning knowledge: bias-variance tradeoff, regression vs.",
+      "confidence": "high"
+    },
+    {
+      "skill_name": "SQL",
+      "category_code": "SQL",
+      "evidence": "Write efficient, production-grade SQL against very large datasets, including schema design and query optimization",
+      "confidence": "high"
+    }
+  ]
+}

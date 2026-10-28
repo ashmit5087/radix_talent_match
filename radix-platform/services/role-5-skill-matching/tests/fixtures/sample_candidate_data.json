@@ -1,0 +1,61 @@
+{
+  "_fixture_note": "SYNTHETIC FIXTURE for smoke tests only - not official RADIX hackathon data. Replace with the official pack via the agreed data location.",
+  "name": "Synthetic Candidate B (data-leaning)",
+  "education": "B.Sc Statistics (synthetic)",
+  "skills": [
+    {
+      "skill_name": "Python",
+      "category_code": "COD",
+      "evidence": "Analysis notebooks with pandas",
+      "confidence": "high"
+    },
+    {
+      "skill_name": "SQL",
+      "category_code": "SQL",
+      "evidence": "Joins, window functions and aggregation for reporting",
+      "confidence": "high"
+    },
+    {
+      "skill_name": "Statistical analysis",
+      "category_code": "OTHER",
+      "evidence": "Hypothesis testing and regression in coursework",
+      "confidence": "high"
+    },
+    {
+      "skill_name": "scikit-learn",
+      "category_code": "AI",
+      "evidence": "Trained classification models",
+      "confidence": "medium"
+    },
+    {
+      "skill_name": "Data Visualisation",
+      "category_code": "OTHER",
+      "evidence": "Built charts and dashboards",
+      "confidence": "high"
+    },
+    {
+      "skill_name": "Power BI",
+      "category_code": "OTHER",
+      "evidence": "Built a sales dashboard",
+      "confidence": "high"
+    },
+    {
+      "skill_name": "Microsoft Excel",
+      "category_code": "OTHER",
+      "evidence": "Pivot tables and lookups",
+      "confidence": "high"
+    },
+    {
+      "skill_name": "Communication skills",
+      "category_code": "COMM",
+      "evidence": "Presented project results",
+      "confidence": "medium"
+    }
+  ],
+  "hackathons": [],
+  "internships": [],
+  "certifications": [],
+  "preferred_roles": [
+    "Data Analyst"
+  ]
+}

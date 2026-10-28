@@ -1,0 +1,67 @@
+{
+  "_fixture_note": "SYNTHETIC FIXTURE (shape per brief p.10) - not official RADIX data.",
+  "company": "Synthetic Co (fixture)",
+  "readiness_score": 58,
+  "skillset_gap": [
+    {
+      "category_code": "COD",
+      "required_level": 7,
+      "candidate_level": 6,
+      "gap": true
+    },
+    {
+      "category_code": "DSA",
+      "required_level": 8,
+      "candidate_level": 6,
+      "gap": true
+    },
+    {
+      "category_code": "OOD",
+      "required_level": 6,
+      "candidate_level": 5,
+      "gap": true
+    },
+    {
+      "category_code": "SQL",
+      "required_level": 6,
+      "candidate_level": 5,
+      "gap": true
+    },
+    {
+      "category_code": "OS",
+      "required_level": 6,
+      "candidate_level": 6,
+      "gap": false
+    },
+    {
+      "category_code": "NETW",
+      "required_level": 5,
+      "candidate_level": 5,
+      "gap": false
+    },
+    {
+      "category_code": "SWE",
+      "required_level": 6,
+      "candidate_level": 6,
+      "gap": false
+    },
+    {
+      "category_code": "SYSD",
+      "required_level": 8,
+      "candidate_level": 3,
+      "gap": true
+    },
+    {
+      "category_code": "COMM",
+      "required_level": 6,
+      "candidate_level": 4,
+      "gap": true
+    },
+    {
+      "category_code": "CLOUD",
+      "required_level": 6,
+      "candidate_level": 1,
+      "gap": true
+    }
+  ]
+}

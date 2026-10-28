@@ -1,0 +1,48 @@
+{
+  "properties": {
+    "category_code": {
+      "enum": [
+        "COD",
+        "DSA",
+        "OOD",
+        "APTI",
+        "COMM",
+        "AI",
+        "CLOUD",
+        "SQL",
+        "SWE",
+        "SYSD",
+        "NETW",
+        "OS",
+        "OTHER"
+      ],
+      "title": "Category Code",
+      "type": "string"
+    },
+    "confidence": {
+      "enum": [
+        "high",
+        "medium",
+        "low"
+      ],
+      "title": "Confidence",
+      "type": "string"
+    },
+    "evidence": {
+      "title": "Evidence",
+      "type": "string"
+    },
+    "skill_name": {
+      "title": "Skill Name",
+      "type": "string"
+    }
+  },
+  "required": [
+    "skill_name",
+    "category_code",
+    "evidence",
+    "confidence"
+  ],
+  "title": "Skill",
+  "type": "object"
+}

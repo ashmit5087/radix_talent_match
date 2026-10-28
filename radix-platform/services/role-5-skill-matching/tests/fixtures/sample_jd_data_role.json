@@ -1,0 +1,57 @@
+{
+  "_fixture_note": "SYNTHETIC FIXTURE for smoke tests only - not official RADIX hackathon data. Replace with the official pack via the agreed data location.",
+  "source_type": "jd",
+  "source_file": "synthetic_data_role_jd.json",
+  "company": "Synthetic Co (fixture)",
+  "role": "Data Analyst (synthetic)",
+  "skills": [
+    {
+      "skill_name": "Python",
+      "category_code": "COD",
+      "evidence": "Scripts data pipelines in Python",
+      "confidence": "high"
+    },
+    {
+      "skill_name": "SQL",
+      "category_code": "SQL",
+      "evidence": "Strong SQL for analysis and reporting",
+      "confidence": "high"
+    },
+    {
+      "skill_name": "Statistics",
+      "category_code": "OTHER",
+      "evidence": "Applies statistical methods to business questions",
+      "confidence": "high"
+    },
+    {
+      "skill_name": "Machine Learning",
+      "category_code": "AI",
+      "evidence": "Familiarity with machine learning techniques",
+      "confidence": "medium"
+    },
+    {
+      "skill_name": "Data Visualization",
+      "category_code": "OTHER",
+      "evidence": "Builds dashboards and charts",
+      "confidence": "high"
+    },
+    {
+      "skill_name": "Power BI",
+      "category_code": "OTHER",
+      "evidence": "Experience with Power BI or similar tools",
+      "confidence": "medium"
+    },
+    {
+      "skill_name": "Excel",
+      "category_code": "OTHER",
+      "evidence": "Advanced spreadsheet skills",
+      "confidence": "high"
+    },
+    {
+      "skill_name": "Communication",
+      "category_code": "COMM",
+      "evidence": "Presents findings to stakeholders",
+      "confidence": "high"
+    }
+  ]
+}

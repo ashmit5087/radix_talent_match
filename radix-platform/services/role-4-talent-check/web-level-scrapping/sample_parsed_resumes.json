@@ -1,0 +1,78 @@
+[
+  {
+    "name": "Alex Chen",
+    "email": "alex.chen@example.com",
+    "github_username": "alexchen-dev",
+    "leetcode_username": "alexchen_code",
+    "technical_skills": [
+      "TypeScript",
+      "JavaScript",
+      "Go",
+      "Python",
+      "SQL",
+      "React",
+      "Next.js",
+      "Node.js",
+      "Docker",
+      "Kubernetes",
+      "PostgreSQL",
+      "Redis",
+      "AWS",
+      "Git"
+    ],
+    "projects": [
+      {
+        "name": "CloudMesh",
+        "description": "High-throughput asynchronous traffic controller in Go and Docker"
+      },
+      {
+        "name": "DataPulse",
+        "description": "Real-time analytics platform using React, FastAPI, and PostgreSQL"
+      }
+    ]
+  },
+  {
+    "name": "Sarah Jenkins",
+    "email": "sarah.j.ml@example.com",
+    "github_username": "sarah-ml-lab",
+    "leetcode_username": null,
+    "technical_skills": [
+      "Python",
+      "C++",
+      "PyTorch",
+      "TensorFlow",
+      "FastAPI",
+      "Docker",
+      "CUDA",
+      "Linux",
+      "Git",
+      "SQL"
+    ],
+    "projects": [
+      {
+        "name": "NeuroTrain",
+        "description": "Distributed model training cluster on PyTorch"
+      }
+    ]
+  },
+  {
+    "name": "Marcus Vance",
+    "email": "marcus.ops@example.com",
+    "github_username": "marcus-ops",
+    "leetcode_username": null,
+    "technical_skills": [
+      "Python",
+      "Go",
+      "AWS",
+      "Docker",
+      "Kubernetes",
+      "GitHub"
+    ],
+    "projects": [
+      {
+        "name": "KubeDeployer",
+        "description": "Declarative canary deployment controller for Kubernetes"
+      }
+    ]
+  }
+]

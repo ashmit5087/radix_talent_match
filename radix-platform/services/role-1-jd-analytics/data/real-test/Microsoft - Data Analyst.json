@@ -1,0 +1,38 @@
+{
+  "source_type": "jd",
+  "source_file": "Microsoft - Data Analyst.docx",
+  "company": null,
+  "role": "Data Analyst",
+  "skills": [
+    {
+      "skill_name": "Aptitude",
+      "category_code": "APTI",
+      "evidence": "Solid quantitative reasoning — interpreting trends, sampling, probability, and reasoning with data tables under ambiguity",
+      "confidence": "high"
+    },
+    {
+      "skill_name": "Communication",
+      "category_code": "COMM",
+      "evidence": "Excellent stakeholder communication — translating a dashboard or an analysis into a decision a non-technical leader can act on",
+      "confidence": "high"
+    },
+    {
+      "skill_name": "Stakeholder Management",
+      "category_code": "COMM",
+      "evidence": "You'll build dashboards, define metrics, and work directly with stakeholders across Microsoft.",
+      "confidence": "medium"
+    },
+    {
+      "skill_name": "Machine Learning",
+      "category_code": "AI",
+      "evidence": "Basic applied statistics/ML literacy: regression vs.",
+      "confidence": "high"
+    },
+    {
+      "skill_name": "SQL",
+      "category_code": "SQL",
+      "evidence": "Write and optimize SQL queries against large production datasets",
+      "confidence": "high"
+    }
+  ]
+}

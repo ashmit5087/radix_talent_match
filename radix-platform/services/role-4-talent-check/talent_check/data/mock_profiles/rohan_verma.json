@@ -1,0 +1,143 @@
+{
+  "name": "Rohan Verma",
+  "email": "rohan.verma@example.com",
+  "education": "B.Tech Computer Science and Engineering, IIT Delhi, 2026",
+  "headline": "Strong all-rounder software engineer with balanced depth in algorithms, full-stack engineering, and distributed systems",
+  "skills": [
+    {
+      "skill_name": "Advanced Data Structures & Competitive Programming",
+      "category_code": "DSA",
+      "evidence": "Candidate Master on Codeforces (rating 1980+), solved 800+ algorithmic problems",
+      "confidence": "high"
+    },
+    {
+      "skill_name": "Graph Theory, Dynamic Programming & Trees",
+      "category_code": "DSA",
+      "evidence": "Expert in complex graph algorithms, flow networks, and string automata",
+      "confidence": "high"
+    },
+    {
+      "skill_name": "Full-Stack Development (TypeScript, Python, Go)",
+      "category_code": "COD",
+      "evidence": "Built multiple microservices handling thousands of requests per second",
+      "confidence": "high"
+    },
+    {
+      "skill_name": "C++ for Low-Level Performance",
+      "category_code": "COD",
+      "evidence": "Optimized memory-intensive computational libraries in modern C++20",
+      "confidence": "high"
+    },
+    {
+      "skill_name": "Object-Oriented Design & Clean Architecture",
+      "category_code": "OOD",
+      "evidence": "Designed modular plugin engine with strict SOLID patterns and Gang of Four designs",
+      "confidence": "high"
+    },
+    {
+      "skill_name": "System Design & Distributed Caching",
+      "category_code": "SYSD",
+      "evidence": "Architected low-latency caching layer with Redis, Kafka, and sharded storage",
+      "confidence": "high"
+    },
+    {
+      "skill_name": "Scalability & Microservices Architecture",
+      "category_code": "SYSD",
+      "evidence": "Designed event-driven backend handling 25,000 concurrent WebSocket connections",
+      "confidence": "high"
+    },
+    {
+      "skill_name": "Relational & NoSQL Databases",
+      "category_code": "SQL",
+      "evidence": "Designed high-throughput PostgreSQL schemas, indexes, and MongoDB collections",
+      "confidence": "high"
+    },
+    {
+      "skill_name": "SQL Query Tuning & Transaction Isolation",
+      "category_code": "SQL",
+      "evidence": "Optimized multi-tenant database partitions and ACID transaction boundaries",
+      "confidence": "high"
+    },
+    {
+      "skill_name": "Software Engineering & Testing Best Practices",
+      "category_code": "SWE",
+      "evidence": "Enforced TDD, 90%+ code coverage, CI/CD GitHub Actions, and PR reviews",
+      "confidence": "high"
+    },
+    {
+      "skill_name": "CI/CD & Cloud Infrastructure (AWS/GCP)",
+      "category_code": "CLOUD",
+      "evidence": "Configured Terraform workflows, Kubernetes deployments, and cloud VPCs",
+      "confidence": "high"
+    },
+    {
+      "skill_name": "Operating System Internals",
+      "category_code": "OS",
+      "evidence": "Strong command of IPC, multithreading, concurrency locks, and memory management",
+      "confidence": "high"
+    },
+    {
+      "skill_name": "Computer Networking (TCP/IP, HTTP/2, WebSockets)",
+      "category_code": "NETW",
+      "evidence": "In-depth understanding of TLS handshakes, HTTP/2 multiplexing, and packet analysis",
+      "confidence": "high"
+    },
+    {
+      "skill_name": "Analytical Problem Solving & Mathematical Modeling",
+      "category_code": "APTI",
+      "evidence": "National top percentile in mathematical olympiad and aptitude competitions",
+      "confidence": "high"
+    },
+    {
+      "skill_name": "Applied Machine Learning & GenAI APIs",
+      "category_code": "AI",
+      "evidence": "Integrated OpenAI function-calling agents in production workflows",
+      "confidence": "high"
+    },
+    {
+      "skill_name": "Technical Leadership & Communication",
+      "category_code": "COMM",
+      "evidence": "Led university coding club, conducted tech workshops for 300+ students",
+      "confidence": "high"
+    }
+  ],
+  "internships": [
+    {
+      "company": "Stripe / HyperPay",
+      "role": "Software Engineering Intern",
+      "duration": "May 2025 - July 2025",
+      "details": "Optimized reconciliation settlement pipeline cutting batch processing time by 40%, architected Redis caching layer, and wrote comprehensive unit/integration test suites."
+    }
+  ],
+  "hackathons": [
+    {
+      "title": "Smart India Hackathon 2025",
+      "award": "National Winner",
+      "description": "High-throughput real-time crop disease diagnosis and alert dispatch network on Kubernetes with AI models."
+    }
+  ],
+  "certifications": [
+    "AWS Certified Solutions Architect",
+    "Certified Kubernetes Application Developer (CKAD)"
+  ],
+  "projects": [
+    {
+      "title": "Distributed Task Scheduler & Queue",
+      "description": "High-performance distributed task scheduler in Go using Redis and Raft for leader election."
+    },
+    {
+      "title": "Full-Stack Collaborative Code Editor",
+      "description": "Real-time collaborative editing platform with WebSockets, operational transforms, and PostgreSQL."
+    },
+    {
+      "title": "Algorithmic Problem Solutions Repository",
+      "description": "Comprehensive library of 800+ solved algorithmic problems with benchmarking tests in C++."
+    }
+  ],
+  "preferred_roles": [
+    "Software Engineer",
+    "Backend Systems Engineer",
+    "Full Stack Engineer"
+  ],
+  "cv_file": "rohan_verma_resume.pdf"
+}
