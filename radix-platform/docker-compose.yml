@@ -12,9 +12,9 @@ version: "3.9"
 services:
 
   # ─── Role 1: JD Analytics ──────────────────────────────────────────────────
-  role-1-jd-analytics:
+  jd-analytics:
     build:
-      context: ./services/role-1-jd-analytics
+      context: ./services/jd-analytics
     container_name: radix-role1
     ports:
       - "8001:8001"
@@ -31,9 +31,9 @@ services:
       retries: 3
 
   # ─── Role 2: Resume Parsing ────────────────────────────────────────────────
-  role-2-resume-parsing:
+  resume-parsing:
     build:
-      context: ./services/role-2-resume-parsing
+      context: ./services/resume-parsing
     container_name: radix-role2
     ports:
       - "8002:8002"
@@ -48,9 +48,9 @@ services:
       retries: 3
 
   # ─── Role 3: Profile Builder ───────────────────────────────────────────────
-  role-3-profile-builder:
+  profile-builder:
     build:
-      context: ./services/role-3-profile-builder
+      context: ./services/profile-builder
     container_name: radix-role3
     ports:
       - "8003:8003"
@@ -66,9 +66,9 @@ services:
       retries: 3
 
   # ─── Role 4: Talent Check ──────────────────────────────────────────────────
-  role-4-talent-check:
+  talent-check:
     build:
-      context: ./services/role-4-talent-check
+      context: ./services/talent-check
     container_name: radix-role4
     ports:
       - "8004:8004"
@@ -82,9 +82,9 @@ services:
       retries: 3
 
   # ─── Role 5: Skill Matching ────────────────────────────────────────────────
-  role-5-skill-matching:
+  skill-matching:
     build:
-      context: ./services/role-5-skill-matching
+      context: ./services/skill-matching
     container_name: radix-role5
     ports:
       - "8005:8005"
@@ -113,11 +113,11 @@ services:
       - "5173:5173"
     command: npm run dev
     depends_on:
-      - role-1-jd-analytics
-      - role-2-resume-parsing
-      - role-3-profile-builder
-      - role-4-talent-check
-      - role-5-skill-matching
+      - jd-analytics
+      - resume-parsing
+      - profile-builder
+      - talent-check
+      - skill-matching
 
 volumes:
   role1-chroma:

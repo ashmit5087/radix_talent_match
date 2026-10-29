@@ -16,16 +16,15 @@ export const Route = createFileRoute("/app")({
 
 const NAV = [
   { to: "/app", label: "Home", icon: Home, exact: true },
-  { to: "/app/assessments", label: "Assessments", icon: ClipboardList },
   { to: "/app/profile", label: "My Profile", icon: UserRound },
-  { to: "/app/skill-growth", label: "Skill Growth", icon: Sprout },
+  { to: "/app/assessments", label: "Assessments", icon: ClipboardList },
   { to: "/app/talent-check", label: "Talent Check", icon: Building2 },
+  { to: "/app/skill-growth", label: "Skill Growth", icon: Sprout },
 ] as const;
 
 function AppShell() {
   const navigate = useNavigate();
   const [profile, setProfile] = useState<CandidateProfile | null>(getSavedProfile());
-  const isSaved = hasSavedProfile() && !!profile;
 
   useEffect(() => {
     if (!hasSavedProfile()) {
@@ -61,11 +60,7 @@ function AppShell() {
             </Link>
           ))}
         </nav>
-        <div className="m-3 rounded-xl bg-secondary p-3 text-xs text-muted-foreground">
-          {isSaved && profile
-            ? `Active: ${profile.full_name} (${profile.skills.length} skills)`
-            : "No profile loaded. Import a resume in onboarding."}
-        </div>
+
       </aside>
 
       <div className="lg:pl-56">
@@ -93,4 +88,3 @@ function AppShell() {
     </div>
   );
 }
-

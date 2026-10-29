@@ -309,6 +309,11 @@ export interface TalentCheckResult {
   company?: string;
   company_id?: number;
   readiness_score: number;
+  baseline_score?: number;
+  baseline_verdict?: string;
+  baseline_levels?: Record<string, number>;
+  score_delta?: number;
+  levels_delta?: Record<string, number>;
   verdict: string;
   verdict_badge?: string;
   verdict_message?: string;
@@ -369,11 +374,21 @@ function normalizeTalentCheck(raw: any): TalentCheckResult {
   const focus_areas: string[] = Array.isArray(raw?.focus_areas)
     ? raw.focus_areas.map((f: any) => (typeof f === "string" ? f : f?.name ?? f?.code ?? ""))
     : [];
+
+  const readiness_score = typeof raw?.readiness_score === "number" ? raw.readiness_score : 0;
+  const baseline_score = typeof raw?.baseline_score === "number" ? raw.baseline_score : readiness_score;
+  const score_delta = typeof raw?.score_delta === "number" ? raw.score_delta : (readiness_score - baseline_score);
+
   return {
     ...raw,
     critical_gaps,
     focus_areas,
-    readiness_score: typeof raw?.readiness_score === "number" ? raw.readiness_score : 0,
+    readiness_score,
+    baseline_score,
+    baseline_verdict: raw?.baseline_verdict ?? raw?.verdict ?? "Needs Work",
+    baseline_levels: raw?.baseline_levels ?? raw?.candidate_levels ?? {},
+    score_delta,
+    levels_delta: raw?.levels_delta ?? {},
     verdict: raw?.verdict ?? "Needs Work",
     web_audit: raw?.web_audit,
   };

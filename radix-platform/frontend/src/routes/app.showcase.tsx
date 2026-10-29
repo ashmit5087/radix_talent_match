@@ -17,7 +17,7 @@ import {
   Layers,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { PageHeader, ScoreRing, DemoTag } from "@/components/radix/ui";
+import { PageHeader, DemoTag } from "@/components/radix/ui";
 import {
   SERVICES,
   analyzeJD,
@@ -601,12 +601,17 @@ function RoleShowcase() {
 
           {matchResult ? (
             <div className="space-y-6">
-              <div className="flex flex-col gap-6 sm:flex-row sm:items-center rounded-2xl bg-secondary/50 p-6">
-                <ScoreRing score={matchResult.match_score} size={140} />
-                <div>
+              <div className="flex flex-col sm:flex-row sm:items-center gap-6 rounded-2xl bg-secondary/50 p-6">
+                <div className="flex items-baseline gap-1 tabular-nums shrink-0">
+                  <span className="font-display text-4xl md:text-5xl font-semibold tracking-tight text-foreground">
+                    {matchResult.match_score}
+                  </span>
+                  <span className="text-sm font-medium text-muted-foreground">/100</span>
+                </div>
+                <div className="border-t sm:border-t-0 sm:border-l border-border/60 pt-4 sm:pt-0 sm:pl-6">
                   <h3 className="text-xl font-semibold">{matchResult.role || "Target Role"}</h3>
                   <p className="text-sm text-muted-foreground">{matchResult.company}</p>
-                  <p className="mt-3 text-sm leading-relaxed max-w-lg">{matchResult.summary}</p>
+                  <p className="mt-2 text-sm leading-relaxed max-w-lg text-muted-foreground">{matchResult.summary}</p>
                 </div>
               </div>
 

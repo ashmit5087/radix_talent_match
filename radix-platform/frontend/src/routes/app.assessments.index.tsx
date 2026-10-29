@@ -44,7 +44,10 @@ function AssessmentsPage() {
               <div><p className="font-medium">{a.role}</p><p className="text-sm text-muted-foreground">{a.company}</p></div>
               <p className="hidden truncate text-sm text-muted-foreground md:block">{a.jd_file}</p>
               <p className="hidden text-sm text-muted-foreground md:block">{a.updated_at}</p>
-              <span className="font-display text-2xl tabular-nums">{a.match.match_score}</span>
+              <div className="text-right">
+                <span className="font-display text-2xl tabular-nums">{a.match.match_score}</span>
+                <span className="text-xs text-muted-foreground">/100</span>
+              </div>
             </Link>
           ))}
         </div>

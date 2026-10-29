@@ -27,7 +27,9 @@ if str(_SERVICE_DIR) not in sys.path:
 from extract import extract_resume  # noqa: E402
 from schema import ResumeExtract  # noqa: E402
 
+logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s: %(message)s")
 logger = logging.getLogger("radix.role2")
+logger.setLevel(logging.INFO)
 
 MAX_UPLOAD_BYTES = 10 * 1024 * 1024  # 10 MB
 ALLOWED_EXTENSIONS = {".pdf", ".docx"}

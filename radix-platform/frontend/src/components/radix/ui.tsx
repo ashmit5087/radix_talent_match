@@ -57,30 +57,17 @@ export function CategoryBadge({ category }: { category: SkillCategory }) {
 }
 
 /** Display-only — the score always comes from the API. Animates once per score. */
-export function ScoreRing({ score, size = 168 }: { score: number; size?: number }) {
-  const r = 72;
-  const c = 2 * Math.PI * r;
-  const [shown, setShown] = useState(0);
-  useEffect(() => {
-    const id = requestAnimationFrame(() => setShown(score));
-    return () => cancelAnimationFrame(id);
-  }, [score]);
+export function ScoreRing({ score, className }: { score: number; size?: number; className?: string }) {
   return (
-    <div className="relative shrink-0" style={{ width: size, height: size }} role="img" aria-label={`Skill-match estimate ${score} out of 100`}>
-      <svg viewBox="0 0 160 160" className="h-full w-full -rotate-90">
-        <circle cx="80" cy="80" r={r} fill="none" stroke="var(--border)" strokeWidth="3" />
-        <circle
-          cx="80" cy="80" r={r} fill="none" stroke="var(--gold)" strokeWidth="3" strokeLinecap="round"
-          strokeDasharray={c} strokeDashoffset={c * (1 - shown / 100)}
-          style={{ transition: "stroke-dashoffset 900ms cubic-bezier(.16,1,.3,1)" }}
-        />
-      </svg>
-      <div className="absolute inset-0 flex flex-col items-center justify-center tabular-nums">
-        <span className="leading-none" style={{ fontSize: size * 0.26, fontWeight: 600, letterSpacing: "-0.03em" }}>
-          {score}<span className="text-muted-foreground" style={{ fontSize: size * 0.09, fontWeight: 500 }}>/100</span>
-        </span>
-        <span className="mt-1.5 text-[11px] text-muted-foreground">Skill-match estimate</span>
-      </div>
+    <div
+      className={cn("flex items-baseline gap-1 tabular-nums shrink-0", className)}
+      role="img"
+      aria-label={`Skill-match estimate ${score} out of 100`}
+    >
+      <span className="font-display text-4xl md:text-5xl font-semibold tracking-tight text-foreground">
+        {score}
+      </span>
+      <span className="text-sm md:text-base font-medium text-muted-foreground">/100</span>
     </div>
   );
 }

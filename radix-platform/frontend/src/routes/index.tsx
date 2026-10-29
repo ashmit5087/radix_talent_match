@@ -88,7 +88,6 @@ function Landing() {
             <Link to="/"><Wordmark /></Link>
             <div className="hidden items-center gap-8 text-sm text-muted-foreground md:flex">
               {links.map((l) => <a key={l.href} href={l.href} className="transition-colors hover:text-primary">{l.label}</a>)}
-              <Link to="/app" className="transition-colors hover:text-primary">Sign in</Link>
             </div>
             <Button asChild className="hidden md:inline-flex"><Link to="/onboarding">Get started</Link></Button>
             <Button variant="ghost" size="icon" className="md:hidden" aria-label={menu ? "Close menu" : "Open menu"} aria-expanded={menu} onClick={() => setMenu(!menu)}>
@@ -99,7 +98,6 @@ function Landing() {
         {menu && (
           <div className="glass absolute inset-x-0 z-20 mx-5 mt-2 flex flex-col gap-1 rounded-lg p-3 text-foreground md:hidden">
             {links.map((l) => <a key={l.href} href={l.href} onClick={() => setMenu(false)} className="rounded-md px-4 py-3 hover:bg-accent">{l.label}</a>)}
-            <Link to="/app" className="rounded-md px-4 py-3 hover:bg-accent">Sign in</Link>
             <Button asChild className="mt-2"><Link to="/onboarding">Get started</Link></Button>
           </div>
         )}

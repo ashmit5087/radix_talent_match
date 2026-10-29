@@ -7,11 +7,16 @@ run real-time deterministic talent checks, and audit candidate public web footpr
 import os
 import sys
 import json
+import time
 import glob
-from typing import Optional, Dict, Any, List
+import logging
+from typing import Optional, Dict, Any, List, Tuple
 from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
+
+logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s: %(message)s")
+logger = logging.getLogger("talent_check")
 
 from talent_check.backend.levels import (
     get_candidate_levels,
@@ -27,19 +32,13 @@ DATA_DIR = os.path.join(BASE_DIR, "data")
 COMPANIES_FILE = os.path.join(DATA_DIR, "companies.json")
 MOCK_DIR = os.path.join(DATA_DIR, "mock_profiles")
 
-# Import Role 4 web-level-scrapping modules
-ROLE4_ROOT = os.path.dirname(BASE_DIR)
-SCRAPING_DIR = os.path.join(ROLE4_ROOT, "web-level-scrapping")
-if SCRAPING_DIR not in sys.path:
-    sys.path.insert(0, SCRAPING_DIR)
-
 try:
-    from github_scraper import GitHubScraper
-    from leetcode_scraper import LeetCodeScraper
-    from skill_matcher import SkillMatcher
+    from talent_check.backend.github_scraper import GitHubScraper
+    from talent_check.backend.leetcode_scraper import LeetCodeScraper
+    from talent_check.backend.skill_matcher import SkillMatcher
     SCRAPING_AVAILABLE = True
 except Exception as e:
-    print(f"Warning: web-level-scrapping not loaded: {e}")
+    print(f"Warning: scrapers not loaded: {e}")
     SCRAPING_AVAILABLE = False
 
 
@@ -68,6 +67,28 @@ def clean_handle(val: Optional[str]) -> Optional[str]:
     if s.startswith("@"):
         s = s[1:]
     return s.strip() if s.strip() else None
+
+
+# In-memory scrape cache: handle -> (timestamp, data)
+_gh_cache: Dict[str, Tuple[float, Dict[str, Any]]] = {}
+_lc_cache: Dict[str, Tuple[float, Dict[str, Any]]] = {}
+CACHE_TTL = 300.0  # 5 minutes
+
+def get_cached_github(handle: str, claimed_skills: List[str], claimed_projects: List[Any]) -> Dict[str, Any]:
+    now = time.time()
+    if handle in _gh_cache and (now - _gh_cache[handle][0]) < CACHE_TTL:
+        return _gh_cache[handle][1]
+    data = GitHubScraper().audit_user(handle, claimed_skills=claimed_skills, claimed_projects=claimed_projects)
+    _gh_cache[handle] = (now, data)
+    return data
+
+def get_cached_leetcode(handle: str, claimed_skills: List[str]) -> Dict[str, Any]:
+    now = time.time()
+    if handle in _lc_cache and (now - _lc_cache[handle][0]) < CACHE_TTL:
+        return _lc_cache[handle][1]
+    data = LeetCodeScraper().audit_user(handle, claimed_skills=claimed_skills)
+    _lc_cache[handle] = (now, data)
+    return data
 
 
 app = FastAPI(
@@ -208,6 +229,12 @@ def run_talent_check(payload: TalentCheckRequest):
     # 3. Layer A: extract candidate levels using evidence points & saturating curve
     candidate_levels, evidence_points = get_candidate_levels_with_points(profile)
 
+    # 3b. Calculate baseline before web audit (Resume-only evidence baseline)
+    baseline_result = score(candidate_levels, company, evidence_points=evidence_points)
+    baseline_score = baseline_result.get("readiness_score", 0)
+    baseline_verdict = baseline_result.get("verdict", "Needs Work")
+    baseline_levels = dict(candidate_levels)
+
     web_audit_result = None
     if payload.enable_web_audit and SCRAPING_AVAILABLE:
         gh_clean = clean_handle(payload.github_handle)
@@ -229,7 +256,7 @@ def run_talent_check(payload: TalentCheckRequest):
 
         if gh_clean:
             try:
-                gh_data = GitHubScraper().audit_user(
+                gh_data = get_cached_github(
                     gh_clean,
                     claimed_skills=claimed_skills,
                     claimed_projects=claimed_projects
@@ -239,7 +266,7 @@ def run_talent_check(payload: TalentCheckRequest):
 
         if lc_clean:
             try:
-                lc_data = LeetCodeScraper().audit_user(
+                lc_data = get_cached_leetcode(
                     lc_clean,
                     claimed_skills=claimed_skills
                 )
@@ -247,35 +274,38 @@ def run_talent_check(payload: TalentCheckRequest):
                 lc_data = {"username": lc_clean, "exists": False, "error": str(e)}
 
         if gh_data or lc_data:
-            match_eval = SkillMatcher.evaluate_candidate(
-                claimed_skills=claimed_skills,
-                claimed_projects=claimed_projects,
-                github_data=gh_data,
-                leetcode_data=lc_data
-            )
-            web_audit_payload = {
-                "github": gh_data,
-                "leetcode": lc_data,
-                "audit": match_eval
-            }
-            # Augment candidate evidence points with verified public footprint!
-            evidence_points = augment_evidence_with_web_audit(evidence_points, web_audit_payload)
-            # Recompute candidate levels based on augmented evidence points
-            candidate_levels = {cat: points_to_level(evidence_points[cat]) for cat in CATEGORIES}
+            try:
+                match_eval = SkillMatcher.evaluate_candidate(
+                    claimed_skills=claimed_skills,
+                    claimed_projects=claimed_projects,
+                    github_data=gh_data,
+                    leetcode_data=lc_data
+                )
+                web_audit_payload = {
+                    "github": gh_data,
+                    "leetcode": lc_data,
+                    "audit": match_eval
+                }
+                # Augment candidate evidence points with verified public footprint!
+                evidence_points = augment_evidence_with_web_audit(evidence_points, web_audit_payload)
+                # Recompute candidate levels based on augmented evidence points
+                candidate_levels = {cat: points_to_level(evidence_points[cat]) for cat in CATEGORIES}
 
-            web_audit_result = {
-                "enabled": True,
-                "github_handle": gh_clean,
-                "leetcode_handle": lc_clean,
-                "composite_reality_score": match_eval.get("composite_reality_score", 0),
-                "candidate_level": match_eval.get("candidate_level", 0.0),
-                "level_designation": match_eval.get("level_designation", ""),
-                "level_explanation": match_eval.get("level_explanation", ""),
-                "sub_scores": match_eval.get("sub_scores", {}),
-                "skills_breakdown": match_eval.get("skills_breakdown", {}),
-                "github_summary": match_eval.get("github_summary", {}),
-                "leetcode_summary": match_eval.get("leetcode_summary", {})
-            }
+                web_audit_result = {
+                    "enabled": True,
+                    "github_handle": gh_clean,
+                    "leetcode_handle": lc_clean,
+                    "composite_reality_score": match_eval.get("composite_reality_score", 0),
+                    "candidate_level": match_eval.get("candidate_level", 0.0),
+                    "level_designation": match_eval.get("level_designation", ""),
+                    "level_explanation": match_eval.get("level_explanation", ""),
+                    "sub_scores": match_eval.get("sub_scores", {}),
+                    "skills_breakdown": match_eval.get("skills_breakdown", {}),
+                    "github_summary": match_eval.get("github_summary", {}),
+                    "leetcode_summary": match_eval.get("leetcode_summary", {})
+                }
+            except Exception as e:
+                print(f"Error evaluating web audit: {e}")
 
     # 4. Layer B: score against company
     result = score(candidate_levels, company, evidence_points=evidence_points)
@@ -284,6 +314,17 @@ def run_talent_check(payload: TalentCheckRequest):
     result["candidate_headline"] = profile.get("headline", "")
     result["candidate_levels"] = candidate_levels
     result["evidence_points"] = evidence_points
+
+    # Before vs After delta reporting
+    result["baseline_score"] = baseline_score
+    result["baseline_verdict"] = baseline_verdict
+    result["baseline_levels"] = baseline_levels
+    result["score_delta"] = result["readiness_score"] - baseline_score
+    result["levels_delta"] = {
+        cat: candidate_levels[cat] - baseline_levels.get(cat, candidate_levels[cat])
+        for cat in CATEGORIES
+    }
+
     if web_audit_result:
         result["web_audit"] = web_audit_result
 
@@ -324,7 +365,7 @@ def audit_web_footprint(payload: WebAuditRequest):
 
     if gh_clean:
         try:
-            gh_data = GitHubScraper().audit_user(
+            gh_data = get_cached_github(
                 gh_clean,
                 claimed_skills=claimed_skills,
                 claimed_projects=claimed_projects
@@ -334,7 +375,7 @@ def audit_web_footprint(payload: WebAuditRequest):
 
     if lc_clean:
         try:
-            lc_data = LeetCodeScraper().audit_user(
+            lc_data = get_cached_leetcode(
                 lc_clean,
                 claimed_skills=claimed_skills
             )

@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState, useEffect } from "react";
 import { ArrowRight, ArrowUpRight, FileUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { LevelBar, ScoreRing } from "@/components/radix/ui";
+import { LevelBar } from "@/components/radix/ui";
 import { getSavedProfile, getLatestLiveAssessment, hasSavedProfile, getSavedAssessments } from "@/lib/radix/session";
 import type { CandidateProfile, AssessmentRecord } from "@/lib/radix/contracts";
 
@@ -85,13 +85,18 @@ function HomePage() {
                 Your latest assessment
               </p>
             </div>
-            <div className="mt-6 flex flex-col gap-8 sm:flex-row sm:items-center">
-              <ScoreRing score={latest.match.match_score} size={150} />
-              <div>
+            <div className="mt-6 flex flex-col sm:flex-row sm:items-center gap-6 rounded-2xl bg-muted/40 border border-border/60 p-6">
+              <div className="flex items-baseline gap-1 tabular-nums shrink-0">
+                <span className="font-display text-4xl md:text-5xl font-semibold tracking-tight text-foreground">
+                  {latest.match.match_score}
+                </span>
+                <span className="text-sm font-medium text-muted-foreground">/100</span>
+              </div>
+              <div className="border-t sm:border-t-0 sm:border-l border-border/60 pt-4 sm:pt-0 sm:pl-6">
                 <h2 className="text-xl font-semibold">{latest.role}</h2>
                 <p className="text-sm text-muted-foreground">{latest.company}</p>
-                <p className="mt-4 max-w-sm text-sm leading-relaxed">{latest.match.summary}</p>
-                <span className="mt-5 inline-flex items-center gap-2 text-sm font-medium">
+                <p className="mt-2 max-w-sm text-sm leading-relaxed text-muted-foreground">{latest.match.summary}</p>
+                <span className="mt-4 inline-flex items-center gap-2 text-sm font-medium text-foreground">
                   View assessment details <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
                 </span>
               </div>

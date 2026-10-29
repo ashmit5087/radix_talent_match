@@ -12,9 +12,12 @@ import signal
 import subprocess
 import threading
 
+# Force unbuffered stdout/stderr across all child processes and python interpreters
+os.environ["PYTHONUNBUFFERED"] = "1"
+
 try:
-    sys.stdout.reconfigure(encoding='utf-8')
-    sys.stderr.reconfigure(encoding='utf-8')
+    sys.stdout.reconfigure(encoding='utf-8', errors='replace')
+    sys.stderr.reconfigure(encoding='utf-8', errors='replace')
 except Exception:
     pass
 from pathlib import Path
@@ -24,52 +27,82 @@ RADIX = ROOT / "radix-platform"
 
 SERVICES = [
     {
-        "name": "Role 1: JD",
+        "name": "Role 1: JD Analytics",
         "tag": "\033[94m[Role 1 JD]\033[0m",
-        "cwd": RADIX / "services" / "role-1-jd-analytics",
+        "cwd": RADIX / "services" / "jd-analytics",
         "cmd": [
-            str(RADIX / "services" / "role-1-jd-analytics" / ".venv" / "Scripts" / "python.exe"),
-            "-m", "uvicorn", "app.main:app", "--port", "8001", "--host", "127.0.0.1"
+            str(RADIX / "services" / "jd-analytics" / ".venv" / "Scripts" / "python.exe"),
+            "-u",
+            "-m", "uvicorn", "app.main:app",
+            "--port", "8001",
+            "--host", "127.0.0.1",
+            "--reload",
+            "--access-log",
+            "--log-level", "info",
         ],
         "port": 8001,
     },
     {
-        "name": "Role 2: Resume",
+        "name": "Role 2: Resume Parsing",
         "tag": "\033[92m[Role 2 Resume]\033[0m",
-        "cwd": RADIX / "services" / "role-2-resume-parsing",
+        "cwd": RADIX / "services" / "resume-parsing",
         "cmd": [
-            str(RADIX / "services" / "role-2-resume-parsing" / ".venv" / "Scripts" / "python.exe"),
-            "-m", "uvicorn", "api_server:app", "--port", "8002", "--host", "127.0.0.1"
+            str(RADIX / "services" / "resume-parsing" / ".venv" / "Scripts" / "python.exe"),
+            "-u",
+            "-m", "uvicorn", "api_server:app",
+            "--port", "8002",
+            "--host", "127.0.0.1",
+            "--reload",
+            "--access-log",
+            "--log-level", "info",
         ],
         "port": 8002,
     },
     {
-        "name": "Role 3: Profile",
+        "name": "Role 3: Profile Builder",
         "tag": "\033[93m[Role 3 Profile]\033[0m",
-        "cwd": RADIX / "services" / "role-3-profile-builder",
+        "cwd": RADIX / "services" / "profile-builder",
         "cmd": [
-            str(RADIX / "services" / "role-3-profile-builder" / ".venv" / "Scripts" / "python.exe"),
-            "-m", "uvicorn", "main:app", "--port", "8003", "--host", "127.0.0.1"
+            str(RADIX / "services" / "profile-builder" / ".venv" / "Scripts" / "python.exe"),
+            "-u",
+            "-m", "uvicorn", "main:app",
+            "--port", "8003",
+            "--host", "127.0.0.1",
+            "--reload",
+            "--access-log",
+            "--log-level", "info",
         ],
         "port": 8003,
     },
     {
-        "name": "Role 4: Talent",
+        "name": "Role 4: Talent Check",
         "tag": "\033[95m[Role 4 Talent]\033[0m",
-        "cwd": RADIX / "services" / "role-4-talent-check",
+        "cwd": RADIX / "services" / "talent-check",
         "cmd": [
-            str(RADIX / "services" / "role-4-talent-check" / ".venv" / "Scripts" / "python.exe"),
-            "-m", "uvicorn", "talent_check.backend.api:app", "--port", "8004", "--host", "127.0.0.1"
+            str(RADIX / "services" / "talent-check" / ".venv" / "Scripts" / "python.exe"),
+            "-u",
+            "-m", "uvicorn", "talent_check.backend.api:app",
+            "--port", "8004",
+            "--host", "127.0.0.1",
+            "--reload",
+            "--access-log",
+            "--log-level", "info",
         ],
         "port": 8004,
     },
     {
-        "name": "Role 5: Match",
+        "name": "Role 5: Skill Matching",
         "tag": "\033[96m[Role 5 Match]\033[0m",
-        "cwd": RADIX / "services" / "role-5-skill-matching",
+        "cwd": RADIX / "services" / "skill-matching",
         "cmd": [
-            str(RADIX / "services" / "role-5-skill-matching" / ".venv" / "Scripts" / "python.exe"),
-            "-m", "uvicorn", "skill_matching.api:app", "--port", "8005", "--host", "127.0.0.1"
+            str(RADIX / "services" / "skill-matching" / ".venv" / "Scripts" / "python.exe"),
+            "-u",
+            "-m", "uvicorn", "skill_matching.api:app",
+            "--port", "8005",
+            "--host", "127.0.0.1",
+            "--reload",
+            "--access-log",
+            "--log-level", "info",
         ],
         "port": 8005,
     },
@@ -123,6 +156,9 @@ def main():
     print("=" * 60 + "\033[0m")
     print("Starting all 5 microservices + frontend in this single window...\n")
 
+    env = os.environ.copy()
+    env["PYTHONUNBUFFERED"] = "1"
+
     for svc in SERVICES:
         if not svc["cwd"].exists():
             print(f"\033[93m[SKIP]\033[0m Directory not found: {svc['cwd']}")
@@ -138,6 +174,7 @@ def main():
                 bufsize=1,
                 encoding="utf-8",
                 errors="replace",
+                env=env,
             )
             processes.append(p)
             t = threading.Thread(target=stream_output, args=(p.stdout, svc["tag"]), daemon=True)
@@ -160,8 +197,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-
-
-
-

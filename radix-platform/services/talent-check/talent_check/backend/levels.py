@@ -27,13 +27,9 @@ CERTIFICATION_POINTS = 1.0
 PROJECT_POINTS = 1.0
 
 # Default saturation parameter: level = round(10 * (1 - exp(-points / k)))
-# k=2.0 (was 4.0): with k=4 a typical profile (1-2 skills per category) topped out around level 2-5,
-# far below real company bars of 7-9, so every strong candidate looked 'Needs Work'. At k=2 a strong
-# all-rounder reaches ~76-90 readiness while Priya still scores higher at Oracle FSS than Google.
 DEFAULT_K = 2.0
 
 # Free-text keyword map for assigning categories to internships, hackathons, certs, and projects
-# Refined to prevent conversational collisions (e.g., 'go', 'led', 'solid', 'rest')
 KEYWORD_MAP: Dict[str, List[str]] = {
     "COD": [
         r"\bpython\b", r"\bjava\b", r"\bc\+\+(?!\w)", r"\bgolang\b",
@@ -112,19 +108,16 @@ KEYWORD_MAP: Dict[str, List[str]] = {
     ]
 }
 
-# Pre-compiled category regex unions for ultra-fast single-pass searching
 COMPILED_CATEGORY_REGEX: Dict[str, re.Pattern] = {
     cat: re.compile(r"(?:" + "|".join(patterns) + r")", re.IGNORECASE)
     for cat, patterns in KEYWORD_MAP.items()
 }
 
-# Individual patterns preserved for backward compatibility
 COMPILED_KEYWORDS = {
     cat: [re.compile(pat, re.IGNORECASE) for pat in patterns]
     for cat, patterns in KEYWORD_MAP.items()
 }
 
-# URL pattern to strip links before keyword matching (avoids false-positive 'NETW' on URLs)
 URL_REGEX = re.compile(r"https?://\S+|www\.\S+", re.IGNORECASE)
 
 def extract_text(item: Any) -> str:
@@ -198,8 +191,12 @@ def derive_evidence_points(profile: Dict[str, Any]) -> Dict[str, float]:
     """
     points = {cat: 0.0 for cat in CATEGORIES}
 
-    # 1. Skills (direct category_code, or rescue OTHER/untagged skills via keyword matching)
+    # 1. Skills
     for s in profile.get("skills", []):
+        if isinstance(s, str):
+            s = {"skill_name": s, "confidence": "medium"}
+        elif not isinstance(s, dict):
+            continue
         cat = str(s.get("category_code") or s.get("category") or "").upper()
         conf = str(s.get("confidence", "medium")).lower()
         pts = CONFIDENCE_POINTS.get(conf, 0.6)
@@ -207,7 +204,6 @@ def derive_evidence_points(profile: Dict[str, Any]) -> Dict[str, float]:
         if cat in points:
             points[cat] += pts
         else:
-            # Skill has category 'OTHER', unknown, or missing -> rescue via keyword matching
             matched_cats = get_matched_categories(s)
             for m_cat in matched_cats:
                 points[m_cat] += pts
@@ -223,7 +219,7 @@ def derive_evidence_points(profile: Dict[str, Any]) -> Dict[str, float]:
                 unique.append(it)
         return unique
 
-    # 2. Internships & Experience (+1.5 for work/internships, +1.0 for hackathons in experience)
+    # 2. Internships & Experience
     all_experience = _dedup_items(profile.get("internships", []) + profile.get("experience", []))
     for exp_item in all_experience:
         text = extract_text(exp_item)
@@ -294,26 +290,28 @@ def augment_evidence_with_web_audit(
     """
     Beta Feature: Augments evidence points across the 12 categories
     using verified code proof from GitHub and problem solving from LeetCode.
+    Safely handles None values from unrated or empty profiles.
     """
     pts = dict(evidence_points)
     if not audit_data:
         return pts
 
-    gh = audit_data.get("github", {})
-    lc = audit_data.get("leetcode", {})
-    audit = audit_data.get("audit", {})
+    gh = audit_data.get("github") or {}
+    lc = audit_data.get("leetcode") or {}
+    audit = audit_data.get("audit") or {}
 
     # 1. Verified Skills on GitHub/LeetCode (extra +1.0 per verified skill)
-    skills_breakdown = audit.get("skills_breakdown", {})
-    verified = skills_breakdown.get("verified_skills", [])
+    skills_breakdown = audit.get("skills_breakdown") or {}
+    verified = skills_breakdown.get("verified_skills") or []
     for skill_name in verified:
-        matched_cats = get_matched_categories({"skill_name": skill_name}, text=skill_name)
+        matched_cats = get_matched_categories({"skill_name": skill_name}, text=str(skill_name))
         for cat in matched_cats:
             pts[cat] = round(pts.get(cat, 0.0) + 1.0, 2)
 
     # 2. GitHub original repos and stars (+0.5 to +2.0 to COD, SWE)
-    orig_repos = len(gh.get("original_repos", [])) if isinstance(gh.get("original_repos"), list) else 0
-    stars = gh.get("total_stars", 0)
+    orig_repos_raw = gh.get("original_repos")
+    orig_repos = len(orig_repos_raw) if isinstance(orig_repos_raw, list) else 0
+    stars = int(gh.get("total_stars") or 0)
     if orig_repos >= 5 or stars >= 10:
         pts["COD"] = round(pts.get("COD", 0.0) + 1.5, 2)
         pts["SWE"] = round(pts.get("SWE", 0.0) + 1.5, 2)
@@ -322,10 +320,11 @@ def augment_evidence_with_web_audit(
         pts["SWE"] = round(pts.get("SWE", 0.0) + 0.8, 2)
 
     # 3. LeetCode problem solving (+1.0 to +3.0 to DSA, APTI)
-    total_solved = lc.get("total_solved", 0)
-    hard_solved = lc.get("hard_solved", 0)
-    med_solved = lc.get("medium_solved", 0)
-    contest_rating = lc.get("contest_rating", 0.0)
+    total_solved = int(lc.get("total_solved") or 0)
+    hard_solved = int(lc.get("hard_solved") or 0)
+    med_solved = int(lc.get("medium_solved") or 0)
+    raw_contest = lc.get("contest_rating")
+    contest_rating = float(raw_contest) if raw_contest is not None else 0.0
 
     if total_solved >= 100 or hard_solved >= 10 or contest_rating >= 1800:
         pts["DSA"] = round(pts.get("DSA", 0.0) + 3.0, 2)
@@ -338,4 +337,3 @@ def augment_evidence_with_web_audit(
         pts["APTI"] = round(pts.get("APTI", 0.0) + 0.8, 2)
 
     return pts
-

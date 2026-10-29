@@ -1,7 +1,7 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { useState } from "react";
 import { AlertTriangle, ArrowLeft, ChevronDown } from "lucide-react";
-import { ScoreRing, SkillRow } from "@/components/radix/ui";
+import { SkillRow } from "@/components/radix/ui";
 import { ACTION_LABELS, CATEGORY_LABELS, type SkillCategory } from "@/lib/radix/contracts";
 import { getLatestLiveAssessment, getSavedAssessments } from "@/lib/radix/session";
 import type { AssessmentRecord } from "@/lib/radix/contracts";
@@ -81,14 +81,19 @@ function Results() {
       </Link>
 
       <div className="surface relative overflow-hidden p-8 md:p-10">
-        <div className="relative flex flex-col gap-10 md:flex-row md:items-center">
-          <ScoreRing score={m.match_score} />
-          <div className="flex-1">
+        <div className="relative flex flex-col md:flex-row md:items-center gap-8">
+          <div className="flex items-baseline gap-1.5 tabular-nums shrink-0">
+            <span className="font-display text-5xl md:text-6xl font-semibold tracking-tight text-foreground">
+              {m.match_score}
+            </span>
+            <span className="text-base font-medium text-muted-foreground">/100</span>
+          </div>
+          <div className="border-t md:border-t-0 md:border-l border-border/60 pt-6 md:pt-0 md:pl-8 flex-1">
             <div className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
               <span>{m.jd_source_file}</span>
               <span>·</span>
               <span>{a.role} Candidate</span>
-                            {isLive && (
+              {isLive && (
                 <span className="rounded-full bg-success/15 px-2 py-0.5 text-xs font-medium text-success">
                   Live result
                 </span>
@@ -96,7 +101,7 @@ function Results() {
             </div>
             <h1 className="font-display mt-3 text-3xl md:text-[34px] leading-tight">{m.role}</h1>
             <p className="text-lg text-muted-foreground">{m.company}</p>
-            <p className="mt-5 max-w-2xl leading-relaxed">{m.summary}</p>
+            <p className="mt-4 max-w-2xl leading-relaxed text-muted-foreground">{m.summary}</p>
           </div>
         </div>
       </div>

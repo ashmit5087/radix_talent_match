@@ -20,7 +20,9 @@ from .config import ALGORITHM_VERSION, SERVICE_NAME
 from .schemas import ImprovementPlan, MatchResponse, PreviewResponse
 from .service import InvalidInputError, NoJobSkillsError, match_raw, improvement_plan_raw, match_with_talent_check_raw, preview_raw
 
+logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s: %(message)s")
 logger = logging.getLogger("skill_matching")
+logger.setLevel(logging.INFO)
 
 app = FastAPI(
     title="RADIX Talent Match - Role 5: Skill Matching",
