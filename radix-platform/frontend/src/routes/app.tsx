@@ -1,6 +1,6 @@
 import { createFileRoute, Link, Outlet, useNavigate, redirect } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { Building2, ClipboardList, Home, Settings, Sprout, UserRound } from "lucide-react";
+import { Building2, ClipboardList, Home, Sprout, UserRound } from "lucide-react";
 import { Wordmark } from "@/components/radix/ui";
 import { getSavedProfile, hasSavedProfile } from "@/lib/radix/session";
 import type { CandidateProfile } from "@/lib/radix/contracts";
@@ -20,7 +20,6 @@ const NAV = [
   { to: "/app/profile", label: "My Profile", icon: UserRound },
   { to: "/app/skill-growth", label: "Skill Growth", icon: Sprout },
   { to: "/app/talent-check", label: "Talent Check", icon: Building2 },
-  { to: "/app/settings", label: "Settings", icon: Settings },
 ] as const;
 
 function AppShell() {
@@ -94,3 +93,4 @@ function AppShell() {
     </div>
   );
 }
+

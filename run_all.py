@@ -11,6 +11,12 @@ import time
 import signal
 import subprocess
 import threading
+
+try:
+    sys.stdout.reconfigure(encoding='utf-8')
+    sys.stderr.reconfigure(encoding='utf-8')
+except Exception:
+    pass
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent
@@ -71,8 +77,8 @@ SERVICES = [
         "name": "Frontend",
         "tag": "\033[97m[Frontend]\033[0m",
         "cwd": RADIX / "frontend",
-        "cmd": ["npm.cmd" if os.name == "nt" else "npm", "run", "dev"],
-        "port": 8081,
+        "cmd": ["npm.cmd" if os.name == "nt" else "npm", "run", "dev", "--", "--port", "5173"],
+        "port": 5173,
     },
 ]
 
@@ -99,13 +105,10 @@ def stop_all(sig=None, frame=None):
     print("\n\033[91m==> Stopping all RADIX platform services...\033[0m", flush=True)
     for p in processes:
         try:
-            p.terminate()
-        except Exception:
-            pass
-    time.sleep(1)
-    for p in processes:
-        try:
-            p.kill()
+            if os.name == "nt":
+                subprocess.run(["taskkill", "/F", "/T", "/PID", str(p.pid)], capture_output=True)
+            else:
+                p.terminate()
         except Exception:
             pass
     print("\033[92mAll services stopped cleanly.\033[0m", flush=True)
@@ -144,7 +147,7 @@ def main():
             print(f"  \033[91m✖\033[0m Failed to start {svc['name']}: {e}")
 
     print("\n\033[1;32mAll services running!\033[0m")
-    print("  Frontend:         http://localhost:8081")
+    print("  Frontend:         http://localhost:5173")
     print("  Role 1 (JD):      http://localhost:8001/health")
     print("  Role 2 (Resume):  http://localhost:8002/health")
     print("  Role 3 (Profile): http://localhost:8003/health")
@@ -157,3 +160,8 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+
+
+
+

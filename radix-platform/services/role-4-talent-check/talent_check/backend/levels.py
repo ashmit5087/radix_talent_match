@@ -200,7 +200,7 @@ def derive_evidence_points(profile: Dict[str, Any]) -> Dict[str, float]:
 
     # 1. Skills (direct category_code, or rescue OTHER/untagged skills via keyword matching)
     for s in profile.get("skills", []):
-        cat = s.get("category_code")
+        cat = str(s.get("category_code") or s.get("category") or "").upper()
         conf = str(s.get("confidence", "medium")).lower()
         pts = CONFIDENCE_POINTS.get(conf, 0.6)
 
@@ -285,4 +285,57 @@ def get_candidate_levels(profile: Dict[str, Any], k: float = DEFAULT_K) -> Dict[
     """
     levels, _ = get_candidate_levels_with_points(profile, k)
     return levels
+
+
+def augment_evidence_with_web_audit(
+    evidence_points: Dict[str, float],
+    audit_data: Dict[str, Any]
+) -> Dict[str, float]:
+    """
+    Beta Feature: Augments evidence points across the 12 categories
+    using verified code proof from GitHub and problem solving from LeetCode.
+    """
+    pts = dict(evidence_points)
+    if not audit_data:
+        return pts
+
+    gh = audit_data.get("github", {})
+    lc = audit_data.get("leetcode", {})
+    audit = audit_data.get("audit", {})
+
+    # 1. Verified Skills on GitHub/LeetCode (extra +1.0 per verified skill)
+    skills_breakdown = audit.get("skills_breakdown", {})
+    verified = skills_breakdown.get("verified_skills", [])
+    for skill_name in verified:
+        matched_cats = get_matched_categories({"skill_name": skill_name}, text=skill_name)
+        for cat in matched_cats:
+            pts[cat] = round(pts.get(cat, 0.0) + 1.0, 2)
+
+    # 2. GitHub original repos and stars (+0.5 to +2.0 to COD, SWE)
+    orig_repos = len(gh.get("original_repos", [])) if isinstance(gh.get("original_repos"), list) else 0
+    stars = gh.get("total_stars", 0)
+    if orig_repos >= 5 or stars >= 10:
+        pts["COD"] = round(pts.get("COD", 0.0) + 1.5, 2)
+        pts["SWE"] = round(pts.get("SWE", 0.0) + 1.5, 2)
+    elif orig_repos >= 2:
+        pts["COD"] = round(pts.get("COD", 0.0) + 0.8, 2)
+        pts["SWE"] = round(pts.get("SWE", 0.0) + 0.8, 2)
+
+    # 3. LeetCode problem solving (+1.0 to +3.0 to DSA, APTI)
+    total_solved = lc.get("total_solved", 0)
+    hard_solved = lc.get("hard_solved", 0)
+    med_solved = lc.get("medium_solved", 0)
+    contest_rating = lc.get("contest_rating", 0.0)
+
+    if total_solved >= 100 or hard_solved >= 10 or contest_rating >= 1800:
+        pts["DSA"] = round(pts.get("DSA", 0.0) + 3.0, 2)
+        pts["APTI"] = round(pts.get("APTI", 0.0) + 2.5, 2)
+    elif total_solved >= 30 or med_solved >= 15 or contest_rating >= 1500:
+        pts["DSA"] = round(pts.get("DSA", 0.0) + 2.0, 2)
+        pts["APTI"] = round(pts.get("APTI", 0.0) + 1.5, 2)
+    elif total_solved > 0:
+        pts["DSA"] = round(pts.get("DSA", 0.0) + 1.0, 2)
+        pts["APTI"] = round(pts.get("APTI", 0.0) + 0.8, 2)
+
+    return pts
 

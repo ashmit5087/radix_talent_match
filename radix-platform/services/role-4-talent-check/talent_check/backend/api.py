@@ -1,10 +1,11 @@
 """
 api.py - FastAPI service for RADIX Talent Check (Role 4)
 Exposes endpoints to query company skill benchmarks, mock candidate profiles,
-and run real-time deterministic talent checks.
+run real-time deterministic talent checks, and audit candidate public web footprints (GitHub & LeetCode).
 """
 
 import os
+import sys
 import json
 import glob
 from typing import Optional, Dict, Any, List
@@ -12,13 +13,62 @@ from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 
-from talent_check.backend.levels import get_candidate_levels, get_candidate_levels_with_points, CATEGORIES
+from talent_check.backend.levels import (
+    get_candidate_levels,
+    get_candidate_levels_with_points,
+    augment_evidence_with_web_audit,
+    points_to_level,
+    CATEGORIES
+)
 from talent_check.backend.scoring import score, CATEGORIES_META, TIER_NAMES
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DATA_DIR = os.path.join(BASE_DIR, "data")
 COMPANIES_FILE = os.path.join(DATA_DIR, "companies.json")
 MOCK_DIR = os.path.join(DATA_DIR, "mock_profiles")
+
+# Import Role 4 web-level-scrapping modules
+ROLE4_ROOT = os.path.dirname(BASE_DIR)
+SCRAPING_DIR = os.path.join(ROLE4_ROOT, "web-level-scrapping")
+if SCRAPING_DIR not in sys.path:
+    sys.path.insert(0, SCRAPING_DIR)
+
+try:
+    from github_scraper import GitHubScraper
+    from leetcode_scraper import LeetCodeScraper
+    from skill_matcher import SkillMatcher
+    SCRAPING_AVAILABLE = True
+except Exception as e:
+    print(f"Warning: web-level-scrapping not loaded: {e}")
+    SCRAPING_AVAILABLE = False
+
+
+def clean_handle(val: Optional[str]) -> Optional[str]:
+    """
+    Cleans raw handles or full URLs (e.g. 'https://github.com/torvalds' -> 'torvalds')
+    """
+    if not val:
+        return None
+    s = str(val).strip()
+    if not s:
+        return None
+    for prefix in [
+        "https://github.com/", "http://github.com/",
+        "https://www.github.com/", "http://www.github.com/",
+        "https://leetcode.com/u/", "http://leetcode.com/u/",
+        "https://leetcode.com/", "http://leetcode.com/",
+        "https://www.leetcode.com/u/", "http://www.leetcode.com/u/",
+        "https://www.leetcode.com/", "http://www.leetcode.com/",
+    ]:
+        if s.lower().startswith(prefix):
+            s = s[len(prefix):]
+            break
+    s = s.strip("/").strip()
+    s = s.split("?")[0].split("#")[0]
+    if s.startswith("@"):
+        s = s[1:]
+    return s.strip() if s.strip() else None
+
 
 app = FastAPI(
     title="RADIX Talent Check API",
@@ -54,10 +104,19 @@ class TalentCheckRequest(BaseModel):
     company_id: int = Field(..., description="Target company ID from staging_company_skill_levels")
     candidate_profile: Optional[Dict[str, Any]] = Field(None, description="Full candidate profile JSON (from Role 3)")
     candidate_id: Optional[str] = Field(None, description="Key of built-in mock profile (e.g. 'ananya_rao')")
+    enable_web_audit: Optional[bool] = Field(False, description="Whether to include GitHub & LeetCode web footprint audit (Beta)")
+    github_handle: Optional[str] = Field(None, description="GitHub username or profile URL")
+    leetcode_handle: Optional[str] = Field(None, description="LeetCode username or profile URL")
 
 class DirectScoreRequest(BaseModel):
     company_id: int
     skill_levels: Dict[str, int] = Field(..., description="Dict of category codes to levels (1-10)")
+
+class WebAuditRequest(BaseModel):
+    github_handle: Optional[str] = None
+    leetcode_handle: Optional[str] = None
+    claimed_skills: Optional[List[Any]] = Field(default_factory=list)
+    claimed_projects: Optional[List[Any]] = Field(default_factory=list)
 
 @app.get("/health")
 @app.get("/api/health")
@@ -65,7 +124,8 @@ def health_check():
     return {
         "status": "healthy",
         "company_count": len(companies_db),
-        "available_categories": list(CATEGORIES_META.keys())
+        "available_categories": list(CATEGORIES_META.keys()),
+        "scraping_available": SCRAPING_AVAILABLE
     }
 
 @app.get("/api/categories")
@@ -82,7 +142,7 @@ def get_categories():
 @app.get("/api/companies")
 def list_companies(
     q: Optional[str] = Query(None, description="Search company name"),
-    limit: int = Query(120, ge=1, le=200)
+    limit: int = Query(300, ge=1, le=1000)
 ):
     if not q:
         filtered = companies_db[:limit]
@@ -90,7 +150,6 @@ def list_companies(
         query_lower = q.lower().strip()
         filtered = [c for c in companies_db if query_lower in c["company"].lower()][:limit]
 
-    # Return summary format for dropdowns and lists
     return [
         {
             "id": c["id"],
@@ -137,7 +196,6 @@ def run_talent_check(payload: TalentCheckRequest):
     # 2. Resolve candidate profile
     profile = payload.candidate_profile
     if not profile and payload.candidate_id:
-        # Load from mock profiles
         mock_path = os.path.join(MOCK_DIR, f"{payload.candidate_id}.json")
         if not os.path.exists(mock_path):
             raise HTTPException(status_code=404, detail=f"Mock candidate '{payload.candidate_id}' not found")
@@ -147,26 +205,92 @@ def run_talent_check(payload: TalentCheckRequest):
     if not profile:
         raise HTTPException(status_code=400, detail="Either 'candidate_profile' or 'candidate_id' must be provided")
 
-    # 3. Layer A: extract or derive candidate levels using evidence points & saturating curve
+    # 3. Layer A: extract candidate levels using evidence points & saturating curve
     candidate_levels, evidence_points = get_candidate_levels_with_points(profile)
+
+    web_audit_result = None
+    if payload.enable_web_audit and SCRAPING_AVAILABLE:
+        gh_clean = clean_handle(payload.github_handle)
+        lc_clean = clean_handle(payload.leetcode_handle)
+
+        claimed_skills = []
+        for s in profile.get("skills", []):
+            if isinstance(s, dict):
+                sname = s.get("skill_name") or s.get("name") or s.get("skill") or ""
+                if sname:
+                    claimed_skills.append(sname)
+            elif isinstance(s, str) and s:
+                claimed_skills.append(s)
+
+        claimed_projects = profile.get("projects", [])
+
+        gh_data = {}
+        lc_data = {}
+
+        if gh_clean:
+            try:
+                gh_data = GitHubScraper().audit_user(
+                    gh_clean,
+                    claimed_skills=claimed_skills,
+                    claimed_projects=claimed_projects
+                )
+            except Exception as e:
+                gh_data = {"username": gh_clean, "exists": False, "error": str(e)}
+
+        if lc_clean:
+            try:
+                lc_data = LeetCodeScraper().audit_user(
+                    lc_clean,
+                    claimed_skills=claimed_skills
+                )
+            except Exception as e:
+                lc_data = {"username": lc_clean, "exists": False, "error": str(e)}
+
+        if gh_data or lc_data:
+            match_eval = SkillMatcher.evaluate_candidate(
+                claimed_skills=claimed_skills,
+                claimed_projects=claimed_projects,
+                github_data=gh_data,
+                leetcode_data=lc_data
+            )
+            web_audit_payload = {
+                "github": gh_data,
+                "leetcode": lc_data,
+                "audit": match_eval
+            }
+            # Augment candidate evidence points with verified public footprint!
+            evidence_points = augment_evidence_with_web_audit(evidence_points, web_audit_payload)
+            # Recompute candidate levels based on augmented evidence points
+            candidate_levels = {cat: points_to_level(evidence_points[cat]) for cat in CATEGORIES}
+
+            web_audit_result = {
+                "enabled": True,
+                "github_handle": gh_clean,
+                "leetcode_handle": lc_clean,
+                "composite_reality_score": match_eval.get("composite_reality_score", 0),
+                "candidate_level": match_eval.get("candidate_level", 0.0),
+                "level_designation": match_eval.get("level_designation", ""),
+                "level_explanation": match_eval.get("level_explanation", ""),
+                "sub_scores": match_eval.get("sub_scores", {}),
+                "skills_breakdown": match_eval.get("skills_breakdown", {}),
+                "github_summary": match_eval.get("github_summary", {}),
+                "leetcode_summary": match_eval.get("leetcode_summary", {})
+            }
 
     # 4. Layer B: score against company
     result = score(candidate_levels, company, evidence_points=evidence_points)
 
-    # Attach candidate metadata for response presentation
     result["candidate_name"] = profile.get("name", "Candidate")
     result["candidate_headline"] = profile.get("headline", "")
     result["candidate_levels"] = candidate_levels
     result["evidence_points"] = evidence_points
+    if web_audit_result:
+        result["web_audit"] = web_audit_result
 
     return result
 
 @app.post("/api/talent-check/direct")
 def run_direct_talent_check(payload: DirectScoreRequest):
-    """
-    Direct simulation endpoint for testing or client integrations.
-    Allows candidates or evaluators to test hypothetical skill levels (1-10) and see immediate readiness impact.
-    """
     company = companies_by_id.get(payload.company_id)
     if not company:
         raise HTTPException(status_code=404, detail=f"Company ID {payload.company_id} not found")
@@ -175,6 +299,60 @@ def run_direct_talent_check(payload: DirectScoreRequest):
     result["candidate_name"] = "Interactive Simulation"
     result["candidate_levels"] = payload.skill_levels
     return result
+
+@app.post("/api/audit/web-footprint")
+def audit_web_footprint(payload: WebAuditRequest):
+    gh_clean = clean_handle(payload.github_handle)
+    lc_clean = clean_handle(payload.leetcode_handle)
+
+    if not gh_clean and not lc_clean:
+        raise HTTPException(status_code=400, detail="Provide at least one of github_handle or leetcode_handle")
+
+    claimed_skills = []
+    for s in (payload.claimed_skills or []):
+        if isinstance(s, dict):
+            sname = s.get("skill_name") or s.get("name") or s.get("skill") or ""
+            if sname:
+                claimed_skills.append(sname)
+        elif isinstance(s, str) and s:
+            claimed_skills.append(s)
+
+    claimed_projects = payload.claimed_projects or []
+
+    gh_data = {}
+    lc_data = {}
+
+    if gh_clean:
+        try:
+            gh_data = GitHubScraper().audit_user(
+                gh_clean,
+                claimed_skills=claimed_skills,
+                claimed_projects=claimed_projects
+            )
+        except Exception as e:
+            gh_data = {"username": gh_clean, "exists": False, "error": str(e)}
+
+    if lc_clean:
+        try:
+            lc_data = LeetCodeScraper().audit_user(
+                lc_clean,
+                claimed_skills=claimed_skills
+            )
+        except Exception as e:
+            lc_data = {"username": lc_clean, "exists": False, "error": str(e)}
+
+    match_evaluation = SkillMatcher.evaluate_candidate(
+        claimed_skills=claimed_skills,
+        claimed_projects=claimed_projects,
+        github_data=gh_data,
+        leetcode_data=lc_data
+    )
+
+    return {
+        "github": gh_data,
+        "leetcode": lc_data,
+        "audit": match_evaluation
+    }
 
 if __name__ == "__main__":
     import uvicorn

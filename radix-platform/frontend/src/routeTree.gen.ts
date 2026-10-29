@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AppRouteImport } from './routes/app'
 import { Route as OnboardingRouteImport } from './routes/onboarding'
+import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as AppIndexRouteImport } from './routes/app.index'
 import { Route as AppOpportunitiesRouteImport } from './routes/app.opportunities'
 import { Route as AppProfileRouteImport } from './routes/app.profile'
@@ -36,6 +37,11 @@ const AppRoute = AppRouteImport.update({
 const OnboardingRoute = OnboardingRouteImport.update({
   id: '/onboarding',
   path: '/onboarding',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SettingsRoute = SettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AppIndexRoute = AppIndexRouteImport.update({
@@ -94,6 +100,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/app': typeof AppRouteWithChildren
   '/onboarding': typeof OnboardingRoute
+  '/settings': typeof SettingsRoute
   '/app/opportunities': typeof AppOpportunitiesRoute
   '/app/profile': typeof AppProfileRoute
   '/app/settings': typeof AppSettingsRoute
@@ -108,6 +115,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/onboarding': typeof OnboardingRoute
+  '/settings': typeof SettingsRoute
   '/app/opportunities': typeof AppOpportunitiesRoute
   '/app/profile': typeof AppProfileRoute
   '/app/settings': typeof AppSettingsRoute
@@ -124,6 +132,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/app': typeof AppRouteWithChildren
   '/onboarding': typeof OnboardingRoute
+  '/settings': typeof SettingsRoute
   '/app/opportunities': typeof AppOpportunitiesRoute
   '/app/profile': typeof AppProfileRoute
   '/app/settings': typeof AppSettingsRoute
@@ -141,6 +150,7 @@ export interface FileRouteTypes {
     | '/'
     | '/app'
     | '/onboarding'
+    | '/settings'
     | '/app/opportunities'
     | '/app/profile'
     | '/app/settings'
@@ -155,6 +165,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/onboarding'
+    | '/settings'
     | '/app/opportunities'
     | '/app/profile'
     | '/app/settings'
@@ -170,6 +181,7 @@ export interface FileRouteTypes {
     | '/'
     | '/app'
     | '/onboarding'
+    | '/settings'
     | '/app/opportunities'
     | '/app/profile'
     | '/app/settings'
@@ -186,6 +198,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AppRoute: typeof AppRouteWithChildren
   OnboardingRoute: typeof OnboardingRoute
+  SettingsRoute: typeof SettingsRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -209,6 +222,13 @@ declare module '@tanstack/react-router' {
       path: '/onboarding'
       fullPath: '/onboarding'
       preLoaderRoute: typeof OnboardingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/settings': {
+      id: '/settings'
+      path: '/settings'
+      fullPath: '/settings'
+      preLoaderRoute: typeof SettingsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/app/': {
@@ -316,6 +336,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AppRoute: AppRouteWithChildren,
   OnboardingRoute: OnboardingRoute,
+  SettingsRoute: SettingsRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

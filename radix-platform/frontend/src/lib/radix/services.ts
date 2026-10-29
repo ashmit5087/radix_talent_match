@@ -262,10 +262,50 @@ export interface Company {
   name: string;
   description?: string;
   industry?: string;
+  skills?: Record<string, number>;
+}
+
+export interface WebAuditResult {
+  enabled: boolean;
+  github_handle?: string | null;
+  leetcode_handle?: string | null;
+  composite_reality_score: number;
+  candidate_level: number;
+  level_designation: string;
+  level_explanation: string;
+  sub_scores?: {
+    github_authenticity?: number;
+    leetcode_problem_solving?: number;
+    skills_corroboration?: number;
+    project_authenticity?: number;
+  };
+  skills_breakdown?: {
+    total_claimed: number;
+    total_verified: number;
+    verified_skills: string[];
+    unverified_skills: string[];
+    bonus_discovered_skills: string[];
+  };
+  github_summary?: {
+    exists: boolean;
+    original_repos: number;
+    forked_repos: number;
+    stars: number;
+    recent_active_repos: number;
+  };
+  leetcode_summary?: {
+    exists: boolean;
+    total_solved: number;
+    easy: number;
+    medium: number;
+    hard: number;
+    contest_rating?: number | null;
+  };
 }
 
 export interface TalentCheckResult {
   candidate_name?: string;
+  candidate_headline?: string;
   company?: string;
   company_id?: number;
   readiness_score: number;
@@ -281,6 +321,8 @@ export interface TalentCheckResult {
     critical_gap_count: number;
     critical_categories: string[];
   };
+  candidate_levels?: Record<string, number>;
+  evidence_points?: Record<string, number>;
   category_results?: Record<string, unknown>;
   skillset_gap?: Array<{
     category_code: string;
@@ -294,10 +336,11 @@ export interface TalentCheckResult {
     ratio: number;
     evidence_points?: number;
   }>;
+  web_audit?: WebAuditResult;
 }
 
 /** GET /api/companies?q=&limit= */
-export async function searchCompanies(q = "", limit = 20): Promise<Company[]> {
+export async function searchCompanies(q = "", limit = 200): Promise<Company[]> {
   const url = new URL(`${base("talent")}/api/companies`);
   if (q) url.searchParams.set("q", q);
   url.searchParams.set("limit", String(limit));
@@ -307,6 +350,7 @@ export async function searchCompanies(q = "", limit = 20): Promise<Company[]> {
     name: company.name ?? company.company ?? "Unknown company",
     description: company.description,
     industry: company.industry,
+    skills: company.skills,
   }));
 }
 
@@ -331,18 +375,30 @@ function normalizeTalentCheck(raw: any): TalentCheckResult {
     focus_areas,
     readiness_score: typeof raw?.readiness_score === "number" ? raw.readiness_score : 0,
     verdict: raw?.verdict ?? "Needs Work",
+    web_audit: raw?.web_audit,
   };
 }
 
-/** POST /api/talent-check — profile-based assessment */
+/** POST /api/talent-check — profile-based assessment with optional web audit (Beta) */
 export async function runTalentCheck(
   companyId: number,
-  profile: CandidateProfile
+  profile: CandidateProfile,
+  options?: {
+    enable_web_audit?: boolean;
+    github_handle?: string;
+    leetcode_handle?: string;
+  }
 ): Promise<TalentCheckResult> {
   const raw = await api<any>(`${base("talent")}/api/talent-check`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ company_id: companyId, candidate_profile: profile }),
+    body: JSON.stringify({
+      company_id: companyId,
+      candidate_profile: profile,
+      enable_web_audit: options?.enable_web_audit ?? false,
+      github_handle: options?.github_handle || undefined,
+      leetcode_handle: options?.leetcode_handle || undefined,
+    }),
   });
   return normalizeTalentCheck(raw);
 }
@@ -358,6 +414,20 @@ export async function runTalentCheckDirect(
     body: JSON.stringify({ company_id: companyId, skill_levels: skillLevels }),
   });
   return normalizeTalentCheck(raw);
+}
+
+/** POST /api/audit/web-footprint — standalone web audit for candidate */
+export async function auditWebFootprint(req: {
+  github_handle?: string;
+  leetcode_handle?: string;
+  claimed_skills?: string[];
+  claimed_projects?: any[];
+}): Promise<any> {
+  return api<any>(`${base("talent")}/api/audit/web-footprint`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(req),
+  });
 }
 
 // ─── Role 5: Skill Matching (port 8005) ───────────────────────────────────────
